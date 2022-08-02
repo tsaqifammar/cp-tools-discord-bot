@@ -10,6 +10,7 @@ client.once('ready', () => {
   console.log('Ready!');
 });
 
+// Add commands from 'commands' folder
 client.commands = new Collection();
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
