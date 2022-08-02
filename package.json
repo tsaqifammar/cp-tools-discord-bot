@@ -1,0 +1,18 @@
+{
+  "name": "cp-tools-discord-bot",
+  "version": "1.0.0",
+  "description": "A discord bot with tools related to competitive programming",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "deploy-commands": "node deploy-commands.js"
+  },
+  "author": "Muhammad Tsaqif Ammar",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/rest": "^1.0.1",
+    "discord.js": "^14.1.2",
+    "nodemon": "^2.0.19"
+  }
+}
