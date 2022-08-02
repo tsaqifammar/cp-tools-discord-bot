@@ -1,0 +1,5 @@
+{
+  "clientId": "the discord's app id",
+  "guildId": "some specific guild id (optional)",
+  "token": "your discord token"
+}
