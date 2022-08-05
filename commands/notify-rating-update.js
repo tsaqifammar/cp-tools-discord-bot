@@ -48,25 +48,18 @@ module.exports = {
         .setName('username')
         .setDescription('Username of your account')
         .setRequired(true)
-    )
-    .addIntegerOption((option) =>
-      option
-        .setName('current-rating')
-        .setDescription('What your current rating is')
-        .setRequired(true)
     ),
   async execute(interaction) {
     const oj = interaction.options.getString('oj');
     const username = interaction.options.getString('username');
-    const currentRating = interaction.options.getInteger('current-rating');
+    await interaction.reply( `Tracking rating updates for ${username} on ${oj}... I will notify you once updated.`);
 
-    await interaction.reply(
-      `Tracking rating updates for ${username} on ${oj}... I will notify you once updated.`
-    );
+    const currentRating = await getRating[oj](username);
 
     async function getNewRatingAndCompare() {
       try {
         const newRating = await getRating[oj](username);
+        console.log(`${username} [initial rating: ${currentRating}, found: ${newRating}]`);
         if (newRating !== currentRating) {
           let diff = newRating - currentRating;
           let delta = diff.toString();
@@ -77,6 +70,7 @@ module.exports = {
           return true;
         }
       } catch (error) {
+        console.log(error);
         interaction.followUp(`Username not found.`);
         return true;
       }
