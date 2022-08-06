@@ -14,7 +14,7 @@ const getRating = {
     const $ = cheerio.load(htmlData);
     const spans = $('.info').find('span[style=font-weight:bold;]');
     const rating = $(spans[0]).text();
-    if (!rating) throw new Error();
+    if (!rating) throw new Error('username-not-found');
     return parseInt(rating);
   },
   atcoder: async function (username) {
@@ -24,7 +24,7 @@ const getRating = {
     const trs = $('.dl-table tr');
     const span = $(trs[4]).find('span')[0];
     const rating = $(span).text();
-    if (!rating) throw new Error();
+    if (!rating) throw new Error('username-not-found');
     return parseInt(rating);
   },
 };
@@ -50,51 +50,54 @@ module.exports = {
         .setRequired(true)
     ),
   async execute(interaction) {
+    const channel = interaction.channel;
     const oj = interaction.options.getString('oj');
     const username = interaction.options.getString('username');
     await interaction.reply( `Tracking rating updates for ${username} on ${oj}... I will notify you once updated.`);
 
-    const currentRating = await getRating[oj](username);
+    let currentRating = 0;
+    try {
+      currentRating = await getRating[oj](username);
+    } catch (error) {
+      await interaction.followUp(`Username not found.`);
+      return;
+    }
 
+    let cnt = -1;
     async function getNewRatingAndCompare() {
       try {
         const newRating = await getRating[oj](username);
-        console.log(`${username} [initial rating: ${currentRating}, found: ${newRating}]`);
+        console.log(`${cnt} ${username} [initial rating: ${currentRating}, found: ${newRating}]`);
         if (newRating !== currentRating) {
           let diff = newRating - currentRating;
           let delta = diff.toString();
           if (diff >= 0) delta = '+' + delta;
-          interaction.followUp(
-            `${username}: ${currentRating} -> ${newRating} (${delta})`
-          );
+          const msg = `${username}: ${currentRating} -> ${newRating} (${delta})`;
+          channel.send({ content: msg });
           return true;
         }
       } catch (error) {
         console.log(error);
-        interaction.followUp(`Username not found.`);
-        return true;
       }
       return false;
     }
 
-    const MAX_CNT = 60*24;
-    let cnt = -1;
+    // const MAX_CNT = 60*24;
+    const MAX_CNT = 60;
     if (await getNewRatingAndCompare()) return;
     const timerId = setInterval(async () => {
       cnt++;
 
       if (cnt === MAX_CNT) {
-        interaction.followUp(
-          `It's been a day but ${username}'s rating hasn't been updated on ${oj}. I will stop tracking.`
-        );
+        const msg = `It's been a day but ${username}'s rating hasn't been updated on ${oj}. I will stop tracking.`;
+        channel.send({ content: msg });
         clearInterval(timerId);
       } else {
         try {
           if (await getNewRatingAndCompare()) clearInterval(timerId);
         } catch (error) {
-          interaction.followUp(
-            `An error happened while tracking ${username}'s rating`
-          );
+          const msg = `An error happened while tracking ${username}'s rating`;
+          channel.send({ content: msg });
           clearInterval(timerId);
         }
       }
