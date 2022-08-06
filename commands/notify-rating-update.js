@@ -82,8 +82,7 @@ module.exports = {
       return false;
     }
 
-    // const MAX_CNT = 60*24;
-    const MAX_CNT = 60;
+    const MAX_CNT = 60*24;
     if (await getNewRatingAndCompare()) return;
     const timerId = setInterval(async () => {
       cnt++;
