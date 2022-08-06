@@ -21,8 +21,8 @@ const getRating = {
     const response = await axios.get(URLS.atcoder + username);
     const htmlData = response.data;
     const $ = cheerio.load(htmlData);
-    const trs = $('.dl-table tr');
-    const span = $(trs[4]).find('span')[0];
+    const trs = $('.dl-table.mt-2 tr');
+    const span = $(trs[2]).find('span')[0];
     const rating = $(span).text();
     if (!rating) throw new Error('username-not-found');
     return parseInt(rating);
