@@ -51,6 +51,7 @@ module.exports = {
     ),
   async execute(interaction) {
     const channel = interaction.channel;
+    const user = interaction.user;
     const oj = interaction.options.getString('oj');
     const username = interaction.options.getString('username');
     await interaction.reply( `Tracking rating updates for ${username} on ${oj}... I will notify you once updated.`);
@@ -72,8 +73,7 @@ module.exports = {
           let diff = newRating - currentRating;
           let delta = diff.toString();
           if (diff >= 0) delta = '+' + delta;
-          const msg = `${username}: ${currentRating} -> ${newRating} (${delta})`;
-          channel.send({ content: msg });
+          await channel.send(`${username}: ${currentRating} -> ${newRating} (${delta}) ${user.toString()}`);
           return true;
         }
       } catch (error) {
@@ -88,15 +88,13 @@ module.exports = {
       cnt++;
 
       if (cnt === MAX_CNT) {
-        const msg = `It's been a day but ${username}'s rating hasn't been updated on ${oj}. I will stop tracking.`;
-        channel.send({ content: msg });
+        await channel.send(`It's been a day but ${username}'s rating hasn't been updated on ${oj}. I will stop tracking. ${user.toString()}`);
         clearInterval(timerId);
       } else {
         try {
           if (await getNewRatingAndCompare()) clearInterval(timerId);
         } catch (error) {
-          const msg = `An error happened while tracking ${username}'s rating`;
-          channel.send({ content: msg });
+          await channel.send(`An error happened while tracking ${username}'s rating ${user.toString()}`);
           clearInterval(timerId);
         }
       }
